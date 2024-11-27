@@ -1,4 +1,48 @@
-import 'dart:collection';
+/// Interfaz para un creador de pruebas.
+abstract class PruebaFactory {
+  Prueba crearPrueba();
+}
+
+/// Factory para crear una prueba simple.
+class PruebaSimpleFactory implements PruebaFactory {
+  final String id;
+  final double notaMaxima;
+
+  PruebaSimpleFactory({required this.id, required this.notaMaxima});
+
+  @override
+  Prueba crearPrueba() {
+    return PruebaSimple(id: id, notaMaxima: notaMaxima);
+  }
+}
+
+/// Factory para crear una prueba compuesta.
+class PruebaCompuestaFactory implements PruebaFactory {
+  final String id;
+  final double notaMaxima;
+  final List<Prueba> subPruebas;
+  final bool calcularPorMedia;
+
+  PruebaCompuestaFactory({
+    required this.id,
+    required this.notaMaxima,
+    required this.subPruebas,
+    this.calcularPorMedia = true,
+  });
+
+  @override
+  Prueba crearPrueba() {
+    if (subPruebas.isEmpty) {
+      throw ArgumentError('Las pruebas compuestas deben tener subpruebas.');
+    }
+    return PruebaCompuesta(
+      id: id,
+      notaMaxima: notaMaxima,
+      subPruebas: subPruebas,
+      calcularPorMedia: calcularPorMedia,
+    );
+  }
+}
 
 /// Clase base para una prueba.
 abstract class Prueba {
@@ -14,42 +58,10 @@ abstract class Prueba {
     this.concluida = false,
   });
 
-  /// Método para calcular la nota de la prueba.
   double calcularNota();
 
-  /// Marcar como concluida.
   void marcarConcluida() {
     concluida = true;
-  }
-}
-
-/// Función para crear una prueba (simple o compuesta).
-Prueba crearPrueba({
-  required String id,
-  required double notaMaxima,
-  bool esCompuesta = false,
-  List<Prueba>? subPruebas,
-  bool calcularPorMedia = true,
-}) {
-  if (esCompuesta) {
-    // Validar que se proporcionen subpruebas.
-    if (subPruebas == null || subPruebas.isEmpty) {
-      throw ArgumentError('Las pruebas compuestas deben tener subpruebas.');
-    }
-
-    // Crear prueba compuesta.
-    return PruebaCompuesta(
-      id: id,
-      notaMaxima: notaMaxima,
-      subPruebas: subPruebas,
-      calcularPorMedia: calcularPorMedia,
-    );
-  } else {
-    // Crear prueba simple.
-    return PruebaSimple(
-      id: id,
-      notaMaxima: notaMaxima,
-    );
   }
 }
 
@@ -82,7 +94,7 @@ class PruebaCompuesta extends Prueba {
   @override
   double calcularNota() {
     if (!subPruebas.every((prueba) => prueba.concluida)) {
-      return 0.0; // No se puede calcular hasta que todas las subpruebas estén concluidas.
+      return 0.0;
     }
 
     final sumaNotas = subPruebas.map((prueba) => prueba.calcularNota()).reduce((a, b) => a + b);
@@ -130,10 +142,6 @@ class Asignatura {
     alumnos[alumno.nombre] = alumno;
   }
 
-  Alumno? obtenerAlumno(String nombre) {
-    return alumnos[nombre];
-  }
-
   void mostrarResultados() {
     for (final alumno in alumnos.values) {
       print('Alumno: ${alumno.nombre}, Nota Final: ${alumno.calcularNotaFinal()}');
@@ -142,36 +150,32 @@ class Asignatura {
 }
 
 void main() {
-  // Crear pruebas simples.
-  final pruebaSimple1 = crearPrueba(id: 'T1', notaMaxima: 10);
-  final pruebaSimple2 = crearPrueba(id: 'T2', notaMaxima: 10);
-  final pruebaSimple3 = crearPrueba(id: 'T2', notaMaxima: 10);
+  // Se crea una prueba usando las factories.
+  final pruebaSimpleFactory1 = PruebaSimpleFactory(id: 'T1', notaMaxima: 10);
+  final pruebaSimpleFactory2 = PruebaSimpleFactory(id: 'T2', notaMaxima: 10);
 
-  // Asignar notas a las pruebas simples.
+  final pruebaSimple1 = pruebaSimpleFactory1.crearPrueba();
+  final pruebaSimple2 = pruebaSimpleFactory2.crearPrueba();
+
   pruebaSimple1.notaAlumno = 8.0;
   pruebaSimple2.notaAlumno = 9.0;
-   pruebaSimple3.notaAlumno = 9.0;
   pruebaSimple1.marcarConcluida();
   pruebaSimple2.marcarConcluida();
 
-  // Crear prueba compuesta (media).
-  final pruebaCompuesta = crearPrueba(
+  final pruebaCompuestaFactory = PruebaCompuestaFactory(
     id: 'PC1',
     notaMaxima: 10,
-    esCompuesta: true,
-    subPruebas: [pruebaSimple1, pruebaSimple2,pruebaSimple3],
-    calcularPorMedia: true,
+    subPruebas: [pruebaSimple1, pruebaSimple2],
   );
+
+  final pruebaCompuesta = pruebaCompuestaFactory.crearPrueba();
   pruebaCompuesta.marcarConcluida();
 
-  // Crear un alumno.
   final alumno = Alumno(nombre: 'Juan');
   alumno.agregarPrueba(pruebaCompuesta);
 
-  // Crear una asignatura.
   final asignatura = Asignatura(nombre: 'Matemáticas');
   asignatura.agregarAlumno(alumno);
 
-  // Mostrar resultados.
   asignatura.mostrarResultados();
 }
