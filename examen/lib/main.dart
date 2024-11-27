@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:ffi';
 
 /// Clase base para una prueba.
 abstract class Prueba {
@@ -21,6 +22,38 @@ abstract class Prueba {
   void marcarConcluida() {
     concluida = true;
   }
+  
+  /// Función para crear una prueba (simple o compuesta).
+Prueba crearPrueba({
+  required String id,
+  required double notaMaxima,
+  bool esCompuesta = false,
+  List<Prueba>? subPruebas,
+  bool calcularPorMedia = true,
+}) {
+  if (esCompuesta) {
+    // Validar que se proporcionen subpruebas.
+    if (subPruebas == null || subPruebas.isEmpty) {
+      throw ArgumentError('Las pruebas compuestas deben tener subpruebas.');
+    }
+
+    // Crear prueba compuesta.
+    return PruebaCompuesta(
+      id: id,
+      notaMaxima: notaMaxima,
+      subPruebas: subPruebas,
+      calcularPorMedia: calcularPorMedia,
+    );
+  } else {
+    // Crear prueba simple.
+    return PruebaSimple(
+      id: id,
+      notaMaxima: notaMaxima,
+    );
+  }
+}
+
+ 
 }
 
 /// Clase para pruebas simples.
@@ -86,6 +119,7 @@ class Alumno {
   }
 }
 
+
 /// Clase para gestionar una asignatura y sus alumnos.
 class Asignatura {
   final String nombre;
@@ -95,6 +129,8 @@ class Asignatura {
     required this.nombre,
     Map<String, Alumno>? alumnos,
   }) : alumnos = alumnos ?? {};
+
+
 
   void agregarAlumno(Alumno alumno) {
     alumnos[alumno.nombre] = alumno;
@@ -114,7 +150,7 @@ class Asignatura {
 void main() {
   // Crear pruebas simples.
   final prueba1 = PruebaSimple(id: 'T1', notaMaxima: 10, notaAlumno: 8);
-  final prueba2 = PruebaSimple(id: 'T2', notaMaxima: 10, notaAlumno: 7);
+  final prueba2 = PruebaSimple(id: 'T2', notaMaxima: 10, notaAlumno: 9);
 
   // Crear prueba compuesta (media).
   final pruebaCompuesta = PruebaCompuesta(
