@@ -14,16 +14,8 @@ abstract class Prueba {
     this.notaAlumno,
     this.concluida = false,
   });
-
-  /// Método para calcular la nota de la prueba.
-  double calcularNota();
-
-  /// Marcar como concluida.
-  void marcarConcluida() {
-    concluida = true;
-  }
   
-  /// Función para crear una prueba (simple o compuesta).
+    /// Función para crear una prueba (simple o compuesta).
 Prueba crearPrueba({
   required String id,
   required double notaMaxima,
@@ -52,6 +44,16 @@ Prueba crearPrueba({
     );
   }
 }
+
+  /// Método para calcular la nota de la prueba.
+  double calcularNota();
+
+  /// Marcar como concluida.
+  void marcarConcluida() {
+    concluida = true;
+  }
+
+
 
  
 }
