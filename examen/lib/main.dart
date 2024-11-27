@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:ffi';
 
 /// Clase base para una prueba.
 abstract class Prueba {
@@ -14,8 +13,17 @@ abstract class Prueba {
     this.notaAlumno,
     this.concluida = false,
   });
-  
-    /// Función para crear una prueba (simple o compuesta).
+
+  /// Método para calcular la nota de la prueba.
+  double calcularNota();
+
+  /// Marcar como concluida.
+  void marcarConcluida() {
+    concluida = true;
+  }
+}
+
+/// Función para crear una prueba (simple o compuesta).
 Prueba crearPrueba({
   required String id,
   required double notaMaxima,
@@ -43,19 +51,6 @@ Prueba crearPrueba({
       notaMaxima: notaMaxima,
     );
   }
-}
-
-  /// Método para calcular la nota de la prueba.
-  double calcularNota();
-
-  /// Marcar como concluida.
-  void marcarConcluida() {
-    concluida = true;
-  }
-
-
-
- 
 }
 
 /// Clase para pruebas simples.
@@ -121,7 +116,6 @@ class Alumno {
   }
 }
 
-
 /// Clase para gestionar una asignatura y sus alumnos.
 class Asignatura {
   final String nombre;
@@ -131,8 +125,6 @@ class Asignatura {
     required this.nombre,
     Map<String, Alumno>? alumnos,
   }) : alumnos = alumnos ?? {};
-
-
 
   void agregarAlumno(Alumno alumno) {
     alumnos[alumno.nombre] = alumno;
@@ -151,18 +143,25 @@ class Asignatura {
 
 void main() {
   // Crear pruebas simples.
-  final prueba1 = PruebaSimple(id: 'T1', notaMaxima: 10, notaAlumno: 8);
-  final prueba2 = PruebaSimple(id: 'T2', notaMaxima: 10, notaAlumno: 9);
+  final pruebaSimple1 = crearPrueba(id: 'T1', notaMaxima: 10);
+  final pruebaSimple2 = crearPrueba(id: 'T2', notaMaxima: 10);
+  final pruebaSimple3 = crearPrueba(id: 'T2', notaMaxima: 10);
+
+  // Asignar notas a las pruebas simples.
+  pruebaSimple1.notaAlumno = 8.0;
+  pruebaSimple2.notaAlumno = 9.0;
+   pruebaSimple3.notaAlumno = 9.0;
+  pruebaSimple1.marcarConcluida();
+  pruebaSimple2.marcarConcluida();
 
   // Crear prueba compuesta (media).
-  final pruebaCompuesta = PruebaCompuesta(
+  final pruebaCompuesta = crearPrueba(
     id: 'PC1',
     notaMaxima: 10,
-    subPruebas: [prueba1, prueba2],
+    esCompuesta: true,
+    subPruebas: [pruebaSimple1, pruebaSimple2,pruebaSimple3],
     calcularPorMedia: true,
   );
-  prueba1.marcarConcluida();
-  prueba2.marcarConcluida();
   pruebaCompuesta.marcarConcluida();
 
   // Crear un alumno.
